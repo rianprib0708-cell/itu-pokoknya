@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>For You ❤️</title>
+
+<style>
+body {
+  margin:0;
+  overflow:hidden;
+  background:black;
+  font-family:sans-serif;
+}
+
+/* TAP */
+.tap {
+  position:fixed;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:24px;
+  z-index:10;
+  background:black;
+}
+
+/* MATRIX */
+#matrix {
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:0;
+}
+
+/* TEXT */
+.text {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-size:80px;
+  color:#ff4d88;
+  z-index:3;
+}
+
+/* GALAXY */
+.stars {
+  position:fixed;
+  width:100%;
+  height:100%;
+  display:none;
+  z-index:1;
+}
+
+.star {
+  position:absolute;
+  background:white;
+  border-radius:50%;
+  animation:twinkle 2s infinite;
+}
+
+@keyframes twinkle {
+  50% {opacity:0.3;}
+}
+
+/* BOOK */
+.book {
+  position:absolute;
+  width:80%;
+  height:60%;
+  top:20%;
+  left:10%;
+  perspective:1500px;
+  display:none;
+  z-index:2;
+}
+
+.page {
+  position:absolute;
+  width:100%;
+  height:100%;
+  transform-origin:left;
+  transform-style:preserve-3d;
+  transition:1s;
+  cursor:pointer;
+}
+
+.page img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:20px;
+  backface-visibility:hidden;
+}
+
+.back {
+  position:absolute;
+  top:0;
+  transform:rotateY(180deg);
+}
+
+.caption {
+  position:absolute;
+  bottom:10px;
+  width:100%;
+  text-align:center;
+  color:pink;
+  font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="tap" id="tap">Tap dulu ❤️</div>
+
+<audio id="music" loop>
+<source src="https://files.catbox.moe/nym68k.mp3">
+</audio>
+
+<canvas id="matrix"></canvas>
+
+<div class="text" id="text"></div>
+
+<div class="stars" id="stars"></div>
+
+<!-- 📖 BOOK -->
+<div class="book" id="book">
+
+  <!-- PAGE 1 -->
+  <div class="page">
+    <img src="https://images.unsplash.com/photo-1511988617509-a57c8a288659">
+    <img class="back" src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e">
+    <div class="caption">awal kita ❤️</div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page">
+    <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e">
+    <img class="back" src="https://images.unsplash.com/photo-1492724441997-5dc865305da7">
+    <div class="caption">moment lucu 😆</div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="page">
+    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9">
+    <img class="back" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee">
+    <div class="caption">jangan ngambek ya 🥺</div>
+  </div>
+
+</div>
+
+<script>
+
+// MUSIC
+tap.onclick=()=>{
+  tap.style.display="none";
+  music.play();
+  start();
+};
+
+// MATRIX PINK
+let c=document.getElementById("matrix");
+let ctx=c.getContext("2d");
+c.width=innerWidth;
+c.height=innerHeight;
+
+let letters="01LOVE♡♥".split("");
+let font=16;
+let col=c.width/font;
+let drops=[];
+
+for(let i=0;i<col;i++) drops[i]=1;
+
+let matrix=setInterval(()=>{
+  ctx.fillStyle="rgba(0,0,0,0.08)";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  ctx.fillStyle="#ff69b4";
+  ctx.shadowColor="#ff69b4";
+  ctx.shadowBlur=10;
+  ctx.font=font+"px monospace";
+
+  for(let i=0;i<drops.length;i++){
+    let t=letters[Math.random()*letters.length|0];
+    ctx.fillText(t,i*font,drops[i]*font);
+
+    if(drops[i]*font>c.height && Math.random()>0.975) drops[i]=0;
+    drops[i]++;
+  }
+},33);
+
+// FLOW
+function start(){
+  let count=3;
+
+  let timer=setInterval(()=>{
+    text.innerText=count;
+    count--;
+
+    if(count<0){
+      clearInterval(timer);
+      clearInterval(matrix);
+      c.style.display="none";
+
+      show("Happy",()=>show("Birthday",startGalaxy));
+    }
+  },1000);
+}
+
+function show(w,next){
+  text.innerText=w;
+  setTimeout(()=>{
+    text.innerText="";
+    next();
+  },1500);
+}
+
+// GALAXY
+function startGalaxy(){
+  stars.style.display="block";
+
+  for(let i=0;i<120;i++){
+    let s=document.createElement("div");
+    s.className="star";
+    let size=Math.random()*3+1;
+    s.style.width=size+"px";
+    s.style.height=size+"px";
+    s.style.top=Math.random()*100+"%";
+    s.style.left=Math.random()*100+"%";
+    stars.appendChild(s);
+  }
+
+  document.getElementById("book").style.display="block";
+}
+
+// 📖 FLIP BOOK
+let pages=document.querySelectorAll(".page");
+let current=0;
+
+pages.forEach((p,i)=>{
+  p.style.zIndex=pages.length-i;
+
+  p.addEventListener("click",()=>{
+    if(current<=i){
+      p.style.transform="rotateY(-180deg)";
+      current++;
+    }else{
+      current--;
+      pages[current].style.transform="rotateY(0deg)";
+    }
+  });
+});
+</script>
+
+</body>
+</html>
